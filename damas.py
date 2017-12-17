@@ -62,7 +62,7 @@ class pecas(object):
 		self.tabu.desenha_tabu()
 		self.cir = pygame.draw.circle(self.tela,self.cor,pos_xy,self.raio)
 
-#função que inicia o programa
+#função que inicia o programa.
 def main():
 	#globais com tamanho da tela
 	global tam_x,tam_y,cor_vermelha,cor_marrom,cor_azul

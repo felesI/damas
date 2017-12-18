@@ -16,7 +16,7 @@ cor_azul = (0,206,209)
 class celula(object):
 	#inicia o objeto o tamanho e a posição na tela com a cor desejada
 	def __init__(self,tam_xy,pos_xy,tela,cor):
-		self.prenchida = False
+		self.preechida = False
 		self.pos_x = pos_xy[0]#pos x da celula ; vai servir para localização e colocação da peça
 		self.pos_y = pos_xy[1]#pos y da celula
 		self.cor = cor#cor da peça
@@ -47,9 +47,6 @@ class tabuleiro(object):
 			for coluna in range(8):
 				if (linha+coluna)%2 == 0:
 					self.matriz_tabuleiro[linha][coluna] = self.celula(tam_pxy,(10+(coluna*50),10+(linha*50)),self.tela,cor_preta)
-					if coluna < 3:
-						self.matriz_tabuleiro[linha][coluna].preechida = True
-						
 				else:
 					self.matriz_tabuleiro[linha][coluna] = self.celula(tam_pxy,(10+(coluna*50),10+(linha*50)),self.tela,cor_branca)
 
@@ -57,21 +54,28 @@ class tabuleiro(object):
 	def muda_cor(self,x,y,cor_nova):
 		self.matriz_tabuleiro[x][y] = self.celula(tam_pxy,(self.matriz_tabuleiro[x][y].pos_x,self.matriz_tabuleiro[x][y].pos_y),self.tela,cor_nova)
 
+
+
 #classe que cria a peça
 class pecas(object):
 	#metodo que inicia a classe
-	def __init__(self,tela,cor,pos_xy,raio,tabuleiro):
+	def __init__(self,tela,cor,pos_xy,tabuleiro):
 		self.tela = tela
-		self.raio = raio
 		self.cor = cor
 		self.tabuleiro = tabuleiro
-		self.cir = pygame.draw.circle(self.tela,self.cor,pos_xy,self.raio)
+		self.cir = pygame.draw.circle(self.tela,self.cor,pos_xy,20)
+		self.posxy = pos_xy
 
+		self.tabuleiro.matriz_tabuleiro[(pos_xy[0]+15)/50 - 1][(pos_xy[1]+15)/50 - 1].preechida = True
+		
 	#metodo que muda a peça de lugar
 	def muda_lugar(self,pos_xy):
+		self.tabuleiro.matriz_tabuleiro[(self.posxy[0]+15)/50 - 1][(self.posxy[1]+15)/50 - 1].preechida = False
 		self.tela.fill(cor_marrom)
 		self.tabuleiro.desenha_tabu()
-		self.cir = pygame.draw.circle(self.tela,self.cor,pos_xy,self.raio)
+		self.tabuleiro.matriz_tabuleiro[(pos_xy[0]+15)/50 - 1][(pos_xy[1]+15)/50 - 1].preechida = True
+		print (pos_xy[0]+15)/50 - 1,(pos_xy[1]+15)/50 - 1
+		self.cir = pygame.draw.circle(self.tela,self.cor,pos_xy,20)
 
 
 
@@ -94,21 +98,38 @@ def main():
 	tabu = tabuleiro(tela,celula)
 
 	#testes para futuras implementações
-	peca = pecas(tela,cor_azul,(35,35),20,tabu)
-
+	peca = pecas(tela,cor_azul,(185,185),tabu)
+	print tabu.matriz_tabuleiro[3][3].preechida
 
 	sair = False
+	aux = True
 	while not sair:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				sair = True
-			if event.type == pygame.MOUSEBUTTONDOWN:
+			if aux:
+				if event.type == pygame.MOUSEBUTTONDOWN:
 					pos_x,pos_y = pygame.mouse.get_pos()
-					pos_x -= 10
-					pos_y -= 10
-					peca.muda_lugar(((pos_x/50)*50+35,(pos_y/50)*50+35))
+					if tabu.matriz_tabuleiro[(pos_x-10)/50][(pos_y-10)/50].preechida:
+						aux = False
+			else:
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					pos_x,pos_y = pygame.mouse.get_pos()
+					if not tabu.matriz_tabuleiro[(pos_x-10)/50][(pos_y-10)/50].preechida:
+						peca.muda_lugar((((pos_x-10)/50)*50+35,((pos_y-10)/50)*50+35))
+						aux = True
+				
+
 		pygame.display.update()	
 
 pygame.quit()
 
 main()
+
+
+
+
+"""
+pos_x,pos_y = pygame.mouse.get_pos()
+peca.muda_lugar((((pos_x-10)/50)*50+35,((pos_y-10)/50)*50+35))
+"""

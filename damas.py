@@ -16,6 +16,7 @@ cor_azul = (0,206,209)
 class celula(object):
 	#inicia o objeto o tamanho e a posição na tela com a cor desejada
 	def __init__(self,tam_xy,pos_xy,tela,cor):
+		self.prenchida = False
 		self.pos_x = pos_xy[0]#pos x da celula ; vai servir para localização e colocação da peça
 		self.pos_y = pos_xy[1]#pos y da celula
 		self.cor = cor#cor da peça
@@ -46,6 +47,9 @@ class tabuleiro(object):
 			for coluna in range(8):
 				if (linha+coluna)%2 == 0:
 					self.matriz_tabuleiro[linha][coluna] = self.celula(tam_pxy,(10+(coluna*50),10+(linha*50)),self.tela,cor_preta)
+					if coluna < 3:
+						self.matriz_tabuleiro[linha][coluna].preechida = True
+						
 				else:
 					self.matriz_tabuleiro[linha][coluna] = self.celula(tam_pxy,(10+(coluna*50),10+(linha*50)),self.tela,cor_branca)
 
@@ -70,6 +74,8 @@ class pecas(object):
 		self.cir = pygame.draw.circle(self.tela,self.cor,pos_xy,self.raio)
 
 
+
+
 #função que inicia o programa
 def main():
 	#globais com tamanho da tela
@@ -89,19 +95,20 @@ def main():
 
 	#testes para futuras implementações
 	peca = pecas(tela,cor_azul,(35,35),20,tabu)
-	peca.muda_lugar((85,85))
-	peca.muda_lugar((135,135)) 
 
-	tabu.muda_cor(7,7,cor_vermelha)
 
 	sair = False
 	while not sair:
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				sair = True
-		pygame.display.update()
+			if event.type == pygame.MOUSEBUTTONDOWN:
+					pos_x,pos_y = pygame.mouse.get_pos()
+					pos_x -= 10
+					pos_y -= 10
+					peca.muda_lugar(((pos_x/50)*50+35,(pos_y/50)*50+35))
+		pygame.display.update()	
 
-	pygame.quit()
-
+pygame.quit()
 
 main()

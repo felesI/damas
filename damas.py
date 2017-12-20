@@ -111,18 +111,30 @@ def main():
 				if event.type == pygame.MOUSEBUTTONDOWN:
 					pos_x,pos_y = pygame.mouse.get_pos()
 					if tabu.matriz_tabuleiro[(pos_x-10)/50][(pos_y-10)/50].preechida:
+						tabu.muda_cor((pos_y-10)/50 - 1,((pos_x-10)/50 - 1),cor_vermelha)
+						tabu.muda_cor((pos_y-10)/50 + 1,((pos_x-10)/50 + 1),cor_vermelha)
+						tabu.muda_cor((pos_y-10)/50 - 1,((pos_x-10)/50 + 1),cor_vermelha)
+						tabu.muda_cor((pos_y-10)/50 + 1,((pos_x-10)/50 - 1),cor_vermelha)
+						aux = False
+					else:
 						aux = False
 			else:
 				if event.type == pygame.MOUSEBUTTONDOWN:
-					pos_x,pos_y = pygame.mouse.get_pos()
-					if not tabu.matriz_tabuleiro[(pos_x-10)/50][(pos_y-10)/50].preechida:
-						peca.muda_lugar((((pos_x-10)/50)*50+35,((pos_y-10)/50)*50+35))
+					posx,posy = pygame.mouse.get_pos()
+					if not tabu.matriz_tabuleiro[(posy-10)/50][(posx-10)/50].preechida and tabu.matriz_tabuleiro[(posy-10)/50][(posx-10)/50].cor == cor_vermelha:
+						peca.muda_lugar((((posx-10)/50)*50+35,((posy-10)/50)*50+35))
 						aux = True
-				
+					else:
+						for i in range(8):
+							for j in range(8):
+								if tabu.matriz_tabuleiro[i][j].cor == cor_vermelha:
+									tabu.matriz_tabuleiro[i][j] = celula(tam_pxy,(10+(i*50),10+(j*50)),tela,cor_preta)
+						aux = True
+
 
 		pygame.display.update()	
 
-pygame.quit()
+	pygame.quit()
 
 main()
 

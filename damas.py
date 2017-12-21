@@ -1,3 +1,5 @@
+#versão: 0.01
+#matheus lisboa - UFCG
 #coding: utf-8
 import pygame
 

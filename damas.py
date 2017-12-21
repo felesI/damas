@@ -90,6 +90,7 @@ def main():
 
 	#pygame iniciado
 	pygame.init()
+	pygame.display.set_caption("Damas!!!")
 
 	#inicando a tela
 	tela = pygame.display.set_mode((tam_x,tam_y))
@@ -116,8 +117,7 @@ def main():
 						tabu.muda_cor((pos_y-10)/50 - 1,((pos_x-10)/50 + 1),cor_vermelha)
 						tabu.muda_cor((pos_y-10)/50 + 1,((pos_x-10)/50 - 1),cor_vermelha)
 						aux = False
-					else:
-						aux = False
+
 			else:
 				if event.type == pygame.MOUSEBUTTONDOWN:
 					posx,posy = pygame.mouse.get_pos()

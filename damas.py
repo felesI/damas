@@ -1,6 +1,9 @@
-#versão: 0.01
-#matheus lisboa - UFCG
 #coding: utf-8
+'''
+projeto - computação 1º periodo - UFCG - 
+Matheus Lisboa Oliveira dos Santos
+versão 0.02
+'''
 import pygame
 
 tam_x = 420
@@ -14,165 +17,127 @@ cor_marrom = (210,180,140)
 cor_vermelha = (255,0,0)
 cor_azul = (0,206,209)
 
-#classe celula
-class celula(object):
-	#inicia o objeto o tamanho e a posição na tela com a cor desejada
-	def __init__(self,tam_xy,pos_xy,tela,cor):
-		self.preechida = False
-		self.pos_x = pos_xy[0]#pos x da celula ; vai servir para localização e colocação da peça
-		self.pos_y = pos_xy[1]#pos y da celula
-		self.cor = cor#cor da peça
-		self.tela = tela#tela onde vai ser colocada
-		self.ret = pygame.Rect(self.pos_x,self.pos_y,tam_xy[0],tam_xy[1])#variavel que vai guardar o objeto para alterações futuras
+#matriz de controle
+matriz = [[(i+j)%2 for i in range(8)] for j in range(8)]
 
-		#metodo que desenha
-		self.desenha()
+## controle de vez ###################
+vez = 2
 
-	#metodo que desenha a celula, para organização
-	def desenha(self):
-		pygame.draw.rect(self.tela,self.cor,self.ret)
+#inicia o pygame #######
+pygame.init()
 
-#classe que controla o tabuleiro
-class tabuleiro(object):
-	global tam_pxy,cor_branca,cor_preta,cor_marrom#import das variaveis globais
-	#metodo que inicia a classe
-	def __init__(self,tela,celula):
-		self.matriz_tabuleiro = [[0 for i in range(8)] for i in range(8)]#matriz que guarda os objetos celula
-		self.tela = tela#tela que vai sae guardada
-		self.celula = celula#atributo celula, não quis usar herança
+tela = pygame.display.set_mode((420,420))
+tela.fill(cor_marrom)
+########################
 
-		self.desenha_tabu()
 
-	#metodo que desenha o tabuleiro e guarda as celulas
-	def desenha_tabu(self):
-		for linha in range(8):
-			for coluna in range(8):
-				if (linha+coluna)%2 == 0:
-					self.matriz_tabuleiro[linha][coluna] = self.celula(tam_pxy,(10+(coluna*50),10+(linha*50)),self.tela,cor_preta)
+def retangulo(pos_x, pos_y,cor):
+	ret = pygame.Rect(pos_x,pos_y,50,50)
+	pygame.draw.rect(tela,cor,ret)
+
+def preenche():
+	l = [cor_preta,cor_branca]
+	for i in range(8):
+		for j in range(8):
+			retangulo(10+j*50,10+i*50,l[(i+j)%2])
+			if matriz[i][j] == 0 and  (2 >= i or i >= 5):
+				if i <= 2:
+					colocaPeca(j*50 + 10, i * 50 + 10,cor_azul)
 				else:
-					self.matriz_tabuleiro[linha][coluna] = self.celula(tam_pxy,(10+(coluna*50),10+(linha*50)),self.tela,cor_branca)
+					colocaPeca(j*50 + 10, i * 50 + 10,cor_vermelha)
 
-	#metodo que muda a cor de uma celula em especifico
-	def muda_cor(self,x,y,cor_nova):
-		self.matriz_tabuleiro[x][y] = self.celula(tam_pxy,(self.matriz_tabuleiro[x][y].pos_x,self.matriz_tabuleiro[x][y].pos_y),self.tela,cor_nova)
+def mostra():
+	for i in range(8):
+		print matriz[i]
+	print ""
 
+def colocaPeca(x,y,cor):
+	matriz[(y-10)/50][(x-10)/50] = 2 if cor == cor_azul else 4
+	pygame.draw.circle(tela,cor,(((x-10)/50 * 50 + 35),((y-10)/50 * 50 + 35)),20)
 
+def movePeca(antes, depois,cor):
+	retangulo(10+((antes[0]-10)/50)*50,10+((antes[1]-10)/50)*50,cor_preta)
+	matriz[(antes[1]-10)/50][(antes[0]-10)/50] = 0
+	colocaPeca(depois[0],depois[1],cor)
 
-#classe que cria a peça
-class pecas(object):
-	#metodo que inicia a classe
-	def __init__(self,tela,cor,pos_xy,tabuleiro):
-		self.tela = tela
-		self.cor = cor
-		self.tabuleiro = tabuleiro
-		self.cir = pygame.draw.circle(self.tela,self.cor,pos_xy,20)
-		self.posxy = pos_xy
+def mudaCor(pos_x,pos_y,cor):
+	pos1 = pos_y*50 + 10
+	pos2 = pos_x*50 + 10
+	if 10 <= pos1 <= 400 and 10 <= pos2 <= 400:
+		retangulo(pos_y*50 + 10,pos_x*50 +10,cor)
 
-		self.tabuleiro.matriz_tabuleiro[(pos_xy[0]+15)/50 - 1][(pos_xy[1]+15)/50 - 1].preechida = True
-		
-	#metodo que muda a peça de lugar
-	def muda_lugar(self,pos_xy):
-		self.tabuleiro.matriz_tabuleiro[(self.posxy[0]+15)/50 - 1][(self.posxy[1]+15)/50 - 1].preechida = False
-		self.tela.fill(cor_marrom)
-		self.tabuleiro.desenha_tabu()
-		self.tabuleiro.matriz_tabuleiro[(pos_xy[0]+15)/50 - 1][(pos_xy[1]+15)/50 - 1].preechida = True
-		print (pos_xy[0]+15)/50 - 1,(pos_xy[1]+15)/50 - 1
-		self.cir = pygame.draw.circle(self.tela,self.cor,pos_xy,20)
+def pinta(pos_x,pos_y, cor, num):
+	m_y = (pos_y - 10)/50
+	m_x = (pos_x - 10)/50
 
+	if matriz[m_y][m_x] % 2 == 0:
+		if m_y + 1 <= 7 and m_x + 1 <= 7 and (matriz[m_y + 1][m_x + 1] == 0 or matriz[m_y + 1][m_x + 1] == 6):
+			mudaCor(m_y + 1,m_x + 1,cor)
+			matriz[m_y + 1][m_x + 1]  = num
+		elif m_y + 2 <= 7 and m_x + 2 <= 7 and (matriz[m_y + 2][m_x + 2] == 0 or matriz[m_y + 2][m_x + 2] == 6):
+			mudaCor(m_y + 2,m_x + 2,cor)
+			matriz[m_y + 2][m_x + 2] = num
 
+		if m_y + 1 <= 7 and m_x - 1 >= 0 and (matriz[m_y + 1][m_x - 1] == 0 or matriz[m_y + 1][m_x - 1] == 6):
+			mudaCor(m_y  + 1, m_x - 1,cor)
+			matriz[m_y + 1][m_x - 1] = num
+		elif m_y + 2 <= 7 and m_x - 2 >= 0 and (matriz[m_y + 2][m_x - 2] == 0 or matriz[m_y + 2][m_x - 2] == 6):
+			matriz[m_y + 2][m_x - 2]  = num
+			mudaCor(m_y + 2,m_x - 2,cor)
 
+		if m_y - 1 >= 0 and m_x + 1 <= 7 and (matriz[m_y  - 1][m_x + 1] == 0 or matriz[m_y  - 1][m_x + 1] == 6):
+			matriz[m_y  - 1][m_x + 1] = num
+			mudaCor(m_y - 1, m_x + 1,cor)
+		elif m_y - 2 >= 0 and m_x + 2 <= 7 and (matriz[m_y  - 2][m_x + 2] == 0 or matriz[m_y  - 2][m_x + 2] == 6):
+			matriz[m_y - 2][m_x + 2] = num
+			mudaCor(m_y - 2, m_x + 2,cor)
 
-#função que inicia o programa
+		if m_y - 1 >= 0 and m_y - 1 >= 0 and (matriz[m_y -  1][m_x - 1] == 0 or matriz[m_y -  1][m_x - 1] == 6):
+			matriz[m_y -  1][m_x - 1] = num
+			mudaCor(m_y - 1,m_x - 1,cor)
+		elif m_y - 2 >= 0 and m_y - 2 >= 0 and (matriz[m_y -  2][m_x - 2] == 0 or matriz[m_y -  2][m_x - 2] == 6):
+			matriz[m_y -  2][m_x - 2] = num
+			mudaCor(m_y - 2,m_x - 2,cor)
+
 def main():
-	#globais com tamanho da tela
-	global tam_x,tam_y,cor_vermelha,cor_marrom,cor_azul
-
-	#cores usadas
-
-
-	#pygame iniciado
-	pygame.init()
-	pygame.display.set_caption("Damas!!!")
-
-	#inicando a tela
-	tela = pygame.display.set_mode((tam_x,tam_y))
-	tela.fill(cor_marrom)
-
-	tabu = tabuleiro(tela,celula)
-
-	#testes para futuras implementações
-	peca = pecas(tela,cor_azul,(185,185),tabu)
-	print tabu.matriz_tabuleiro[3][3].preechida
+	global vez
+	preenche()
+	mostra()
 
 	sair = False
-	aux = True
+	clique = False
 	while not sair:
 		for event in pygame.event.get():
+
 			if event.type == pygame.QUIT:
 				sair = True
-			if aux:
-				if event.type == pygame.MOUSEBUTTONDOWN:
-					pos_x,pos_y = pygame.mouse.get_pos()
-					if tabu.matriz_tabuleiro[(pos_x-10)/50][(pos_y-10)/50].preechida:
-						tabu.muda_cor((pos_y-10)/50 - 1,((pos_x-10)/50 - 1),cor_vermelha)
-						tabu.muda_cor((pos_y-10)/50 + 1,((pos_x-10)/50 + 1),cor_vermelha)
-						tabu.muda_cor((pos_y-10)/50 - 1,((pos_x-10)/50 + 1),cor_vermelha)
-						tabu.muda_cor((pos_y-10)/50 + 1,((pos_x-10)/50 - 1),cor_vermelha)
-						aux = False
 
+			if not clique:
+				if event.type == pygame.MOUSEBUTTONDOWN:
+					an_x,an_y = pygame.mouse.get_pos()
+					if (10 < an_x < 400) and (10 < an_y < 400) and matriz[(an_y-10)/50][(an_x-10)/50] == vez:
+						pinta(an_x,an_y,cor_vermelha,6)
+						clique = True
+						
 			else:
 				if event.type == pygame.MOUSEBUTTONDOWN:
-					posx,posy = pygame.mouse.get_pos()
-					if not tabu.matriz_tabuleiro[(posy-10)/50][(posx-10)/50].preechida and tabu.matriz_tabuleiro[(posy-10)/50][(posx-10)/50].cor == cor_vermelha:
-						peca.muda_lugar((((posx-10)/50)*50+35,((posy-10)/50)*50+35))
-						aux = True
+					de_x,de_y = pygame.mouse.get_pos()
+					if (10 < de_x < 400) and (10 < de_y < 400) and  matriz[(de_y-10)/50][(de_x-10)/50] == 6:
+						pinta(an_x,an_y,cor_preta,0)
+						movePeca((an_x,an_y),(de_x,de_y), cor_azul if vez == 2 else cor_vermelha)
+						a = 50 if an_x > de_x else -50
+						b = 50 if an_y > de_y else -50
+						matriz[(de_y+b - 10) / 50][(de_x+a - 10)/50] = 0
+						retangulo(10+(de_x+a-10)/50*50,10+(de_y+b-10)/50*50,cor_preta)
+						vez = 2 if vez == 4 else 4
+						clique = False
 					else:
-						for i in range(8):
-							for j in range(8):
-								if tabu.matriz_tabuleiro[i][j].cor == cor_vermelha:
-									tabu.matriz_tabuleiro[i][j] = celula(tam_pxy,(10+(j*50),10+(i*50)),tela,cor_preta)
-						aux = True
-
-
-		pygame.display.update()	
+						pinta(an_x,an_y,cor_preta,0)
+						clique = False
+		
+		pygame.display.update()
 
 	pygame.quit()
 
+
 main()
-
-
-#estrutura que controla os movimentos do player
-'''
-aux = False
-if aux:
-	if event.type == pygame.MOUSEBUTTONDOWN:
-		pos_x,pos_y = pygame.mouse.get_pos()
-		if tabu.matriz_tabuleiro[(pos_x-10)/50][(pos_y-10)/50].preechida:
-			tabu.muda_cor((pos_y-10)/50 - 1,((pos_x-10)/50 - 1),cor_vermelha)
-			tabu.muda_cor((pos_y-10)/50 + 1,((pos_x-10)/50 + 1),cor_vermelha)
-			tabu.muda_cor((pos_y-10)/50 - 1,((pos_x-10)/50 + 1),cor_vermelha)
-			tabu.muda_cor((pos_y-10)/50 + 1,((pos_x-10)/50 - 1),cor_vermelha)
-			aux = False
-		else:
-			aux = False
-else:
-	if event.type == pygame.MOUSEBUTTONDOWN:
-		posx,posy = pygame.mouse.get_pos()
-		if not tabu.matriz_tabuleiro[(posy-10)/50][(posx-10)/50].preechida and tabu.matriz_tabuleiro[(posy-10)/50][(posx-10)/50].cor == cor_vermelha:
-		peca.muda_lugar((((posx-10)/50)*50+35,((posy-10)/50)*50+35))
-			aux = True
-		else:
-			for i in range(8):
-				for j in range(8):
-				if tabu.matriz_tabuleiro[i][j].cor == cor_vermelha:
-					tabu.matriz_tabuleiro[i][j] = celula(tam_pxy,(10+(j*50),10+(i*50)),tela,cor_preta)
-			aux = True
-
-'''
-
-
-
-"""
-pos_x,pos_y = pygame.mouse.get_pos()
-peca.muda_lugar((((pos_x-10)/50)*50+35,((pos_y-10)/50)*50+35))
-"""

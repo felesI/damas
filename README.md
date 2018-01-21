@@ -1,6 +1,6 @@
 # damas
 
 
-Projeto de Computação - UFCG -
-1º periodo
+Projeto de Computação - UFCG -\n
+1º periodo\n
 Matheus Lisboa Oliveira dos Santos

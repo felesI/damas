@@ -5,23 +5,26 @@ Matheus Lisboa Oliveira dos Santos
 versão 0.02
 '''
 import pygame
-
+ 
 tam_x = 420
 tam_y = 420
-
-tam_pxy = (50,50)
 
 cor_preta  = (0,0,0)
 cor_branca = (255,255,255)
 cor_marrom = (210,180,140)
 cor_vermelha = (255,0,0)
 cor_azul = (0,206,209)
+cor_cinza = (128,128,128)
 
 #matriz de controle
 matriz = [[(i+j)%2 for i in range(8)] for j in range(8)]
 
 ## controle de vez ###################
 vez = 2
+
+############# controle de pontos #######
+p_azul = 0
+p_vermelho = 0
 
 #inicia o pygame #######
 pygame.init()
@@ -60,6 +63,20 @@ def movePeca(antes, depois,cor):
 	matriz[(antes[1]-10)/50][(antes[0]-10)/50] = 0
 	colocaPeca(depois[0],depois[1],cor)
 
+def canEat():
+	for i in range(8):
+		for j in range(8):
+			if matriz[i][j] == vez:
+				if (i+2 < 8) and (j+2 < 8) and matriz[i+1][j+1] == (4 if vez == 2 else 2) and matriz[i+2][j+2] == 0:
+					return [1,i + 2,j + 2]
+				elif (i+2 < 8) and (j-2 >= 0) and matriz[i+1][j-1] == (4 if vez == 2 else 2) and matriz[i+2][j-2] == 0:
+					return [1,i + 2,j - 2]
+				elif (i-2 >= 0) and (j+2 < 8) and matriz[i-1][j+1] == (4 if vez == 2 else 2) and matriz[i-2][j+2] == 0:
+					return [1,i - 2,j + 2]
+				elif (i-2 >= 0) and (j - 2 >= 0) and matriz[i-1][j-1] == (4 if vez == 2 else 2) and matriz[i-2][j-2] == 0:
+					return [1,i - 2,j - 2]
+	return [0,0,0]
+
 def mudaCor(pos_x,pos_y,cor):
 	pos1 = pos_y*50 + 10
 	pos2 = pos_x*50 + 10
@@ -69,43 +86,57 @@ def mudaCor(pos_x,pos_y,cor):
 def pinta(pos_x,pos_y, cor, num):
 	m_y = (pos_y - 10)/50
 	m_x = (pos_x - 10)/50
-
 	if matriz[m_y][m_x] % 2 == 0:
-		if m_y + 1 <= 7 and m_x + 1 <= 7 and (matriz[m_y + 1][m_x + 1] == 0 or matriz[m_y + 1][m_x + 1] == 6):
-			mudaCor(m_y + 1,m_x + 1,cor)
-			matriz[m_y + 1][m_x + 1]  = num
-		elif m_y + 2 <= 7 and m_x + 2 <= 7 and (matriz[m_y + 2][m_x + 2] == 0 or matriz[m_y + 2][m_x + 2] == 6):
-			mudaCor(m_y + 2,m_x + 2,cor)
-			matriz[m_y + 2][m_x + 2] = num
+		if vez == 2:
+			if m_y + 1 <= 7 and m_x + 1 <= 7 and (matriz[m_y + 1][m_x + 1] == 0 or matriz[m_y + 1][m_x + 1] == 6):
+				mudaCor(m_y + 1,m_x + 1,cor)
+				matriz[m_y + 1][m_x + 1]  = num
+			
 
-		if m_y + 1 <= 7 and m_x - 1 >= 0 and (matriz[m_y + 1][m_x - 1] == 0 or matriz[m_y + 1][m_x - 1] == 6):
-			mudaCor(m_y  + 1, m_x - 1,cor)
-			matriz[m_y + 1][m_x - 1] = num
-		elif m_y + 2 <= 7 and m_x - 2 >= 0 and (matriz[m_y + 2][m_x - 2] == 0 or matriz[m_y + 2][m_x - 2] == 6):
-			matriz[m_y + 2][m_x - 2]  = num
-			mudaCor(m_y + 2,m_x - 2,cor)
+			if m_y + 1 <= 7 and m_x - 1 >= 0 and (matriz[m_y + 1][m_x - 1] == 0 or matriz[m_y + 1][m_x - 1] == 6):
+				mudaCor(m_y  + 1, m_x - 1,cor)
+				matriz[m_y + 1][m_x - 1] = num
+			
+		else:
+			if m_y - 1 >= 0 and m_x + 1 <= 7 and (matriz[m_y  - 1][m_x + 1] == 0 or matriz[m_y  - 1][m_x + 1] == 6):
+				matriz[m_y  - 1][m_x + 1] = num
+				mudaCor(m_y - 1, m_x + 1,cor)
 
-		if m_y - 1 >= 0 and m_x + 1 <= 7 and (matriz[m_y  - 1][m_x + 1] == 0 or matriz[m_y  - 1][m_x + 1] == 6):
-			matriz[m_y  - 1][m_x + 1] = num
-			mudaCor(m_y - 1, m_x + 1,cor)
-		elif m_y - 2 >= 0 and m_x + 2 <= 7 and (matriz[m_y  - 2][m_x + 2] == 0 or matriz[m_y  - 2][m_x + 2] == 6):
-			matriz[m_y - 2][m_x + 2] = num
-			mudaCor(m_y - 2, m_x + 2,cor)
+			if m_y - 1 >= 0 and m_y - 1 >= 0 and (matriz[m_y -  1][m_x - 1] == 0 or matriz[m_y -  1][m_x - 1] == 6):
+				matriz[m_y -  1][m_x - 1] = num
+				mudaCor(m_y - 1,m_x - 1,cor)
 
-		if m_y - 1 >= 0 and m_y - 1 >= 0 and (matriz[m_y -  1][m_x - 1] == 0 or matriz[m_y -  1][m_x - 1] == 6):
-			matriz[m_y -  1][m_x - 1] = num
-			mudaCor(m_y - 1,m_x - 1,cor)
-		elif m_y - 2 >= 0 and m_y - 2 >= 0 and (matriz[m_y -  2][m_x - 2] == 0 or matriz[m_y -  2][m_x - 2] == 6):
-			matriz[m_y -  2][m_x - 2] = num
-			mudaCor(m_y - 2,m_x - 2,cor)
 
+		if m_y + 2 <= 7 and m_x + 2 <= 7 and (matriz[m_y + 2][m_x + 2] == 0 or matriz[m_y + 2][m_x + 2] == 6):
+				if matriz[m_y + 1][m_x + 1] == (2 if vez == 4 else 4):
+					mudaCor(m_y + 2,m_x + 2,cor)
+					matriz[m_y + 2][m_x + 2] = num
+
+		if m_y + 2 <= 7 and m_x - 2 >= 0 and (matriz[m_y + 2][m_x - 2] == 0 or matriz[m_y + 2][m_x - 2] == 6):
+				if matriz[m_y + 1][m_x - 1] == (2 if vez == 4 else 4):
+					matriz[m_y + 2][m_x - 2]  = num
+					mudaCor(m_y + 2,m_x - 2,cor)
+
+		if m_y - 2 >= 0 and m_x + 2 <= 7 and (matriz[m_y  - 2][m_x + 2] == 0 or matriz[m_y  - 2][m_x + 2] == 6):
+			if matriz[m_y  - 1][m_x + 1] == (2 if vez == 4 else 4):
+				matriz[m_y - 2][m_x + 2] = num
+				mudaCor(m_y - 2, m_x + 2,cor)
+
+		if m_y - 2 >= 0 and m_y - 2 >= 0 and (matriz[m_y -  2][m_x - 2] == 0 or matriz[m_y -  2][m_x - 2] == 6):
+			if matriz[m_y -  1][m_x - 1] ==  (2 if vez == 4 else 4):
+				matriz[m_y -  2][m_x - 2] = num
+				mudaCor(m_y - 2,m_x - 2,cor)
+
+
+
+				
 def main():
-	global vez
+	global vez,p_vermelho,p_azul
 	preenche()
-	mostra()
 
 	sair = False
 	clique = False
+	lis = [0,0,0]
 	while not sair:
 		for event in pygame.event.get():
 
@@ -116,28 +147,46 @@ def main():
 				if event.type == pygame.MOUSEBUTTONDOWN:
 					an_x,an_y = pygame.mouse.get_pos()
 					if (10 < an_x < 400) and (10 < an_y < 400) and matriz[(an_y-10)/50][(an_x-10)/50] == vez:
-						pinta(an_x,an_y,cor_vermelha,6)
+						mudaCor((an_y-10)/50,(an_x-10)/50,cor_cinza)
+						colocaPeca(an_x,an_y, cor_azul if vez == 2 else cor_vermelha)
+						pinta(an_x,an_y,cor_cinza,6)
 						clique = True
-						
+
 			else:
 				if event.type == pygame.MOUSEBUTTONDOWN:
 					de_x,de_y = pygame.mouse.get_pos()
 					if (10 < de_x < 400) and (10 < de_y < 400) and  matriz[(de_y-10)/50][(de_x-10)/50] == 6:
-						pinta(an_x,an_y,cor_preta,0)
-						movePeca((an_x,an_y),(de_x,de_y), cor_azul if vez == 2 else cor_vermelha)
-						a = 50 if an_x > de_x else -50
-						b = 50 if an_y > de_y else -50
-						matriz[(de_y+b - 10) / 50][(de_x+a - 10)/50] = 0
-						retangulo(10+(de_x+a-10)/50*50,10+(de_y+b-10)/50*50,cor_preta)
-						vez = 2 if vez == 4 else 4
-						clique = False
+						if (lis[0] == 1 and lis[1] == (de_y-10)/50 and lis[2] == (de_x-10)/50) or lis[0] == 0:
+							pinta(an_x,an_y,cor_preta,0)
+							movePeca((an_x,an_y),(de_x,de_y), cor_azul if vez == 2 else cor_vermelha)
+
+							a = 50 if an_x > de_x else -50
+							b = 50 if an_y > de_y else -50
+							if matriz[(de_y+b - 10) / 50][(de_x+a - 10)/50] != 0:
+								if matriz[(de_y+b - 10) / 50][(de_x+a - 10)/50] == 2:
+									p_vermelho += 1
+								else:
+									p_azul += 1
+								matriz[(de_y+b - 10) / 50][(de_x+a - 10)/50] = 0
+								print "pontos do vermelho: %d\npontos do azul: %d"%(p_vermelho,p_azul)
+							else:
+								vez = 2 if vez == 4 else 4
+
+							retangulo(10+(de_x+a-10)/50*50,10+(de_y+b-10)/50*50,cor_preta)
+							clique = False
+							lis = canEat()
 					else:
+						mudaCor((an_y-10)/50,(an_x-10)/50,cor_preta)
+						colocaPeca(an_x,an_y, cor_azul if vez == 2 else cor_vermelha)
 						pinta(an_x,an_y,cor_preta,0)
 						clique = False
+
+
+			if p_azul == 12 or p_vermelho == 12:
+				sair = True
 		
 		pygame.display.update()
 
 	pygame.quit()
-
 
 main()

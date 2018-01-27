@@ -77,14 +77,14 @@ def canEat():
 		for j in range(8):
 			if matriz[i][j] == vez:
 				if (i+2 < 8) and (j+2 < 8) and matriz[i+1][j+1] == (4 if vez == 2 else 2) and matriz[i+2][j+2] == 0:
-					return [1,i + 2,j + 2, i, j]
-				elif (i+2 < 8) and (j-2 >= 0) and matriz[i+1][j-1] == (4 if vez == 2 else 2) and matriz[i+2][j-2] == 0:
-					return [1,i + 2,j - 2, i, j]
+					return True
+				if (i+2 < 8) and (j-2 >= 0) and matriz[i+1][j-1] == (4 if vez == 2 else 2) and matriz[i+2][j-2] == 0:
+					return True
 				if (i-2 >= 0) and (j+2 < 8) and matriz[i-1][j+1] == (4 if vez == 2 else 2) and matriz[i-2][j+2] == 0:
-					return [1,i - 2,j + 2, i, j]
-				elif (i-2 >= 0) and (j - 2 >= 0) and matriz[i-1][j-1] == (4 if vez == 2 else 2) and matriz[i-2][j-2] == 0:
-					return [1,i - 2,j - 2, i, j]
-	return [0,0,0,0,0]
+					return True
+				if (i-2 >= 0) and (j - 2 >= 0) and matriz[i-1][j-1] == (4 if vez == 2 else 2) and matriz[i-2][j-2] == 0:
+					return True
+	return False
 
 def mudaCor(pos_x,pos_y,cor):
 	pos1 = pos_y*50 + 10
@@ -144,7 +144,7 @@ def main():
 
 	sair = False
 	clique = False
-	lis = [0,0,0,0,0]
+	var = canEat()
 	while not sair:
 		for event in pygame.event.get():
 
@@ -164,7 +164,8 @@ def main():
 				if event.type == pygame.MOUSEBUTTONDOWN:
 					de_x,de_y = pygame.mouse.get_pos()
 					if (10 < de_x < 400) and (10 < de_y < 400) and  matriz[(de_y-10)/50][(de_x-10)/50] == 6:
-						if (lis[0] == 1 and lis[1] == (de_y-10)/50 and lis[2] == (de_x-10)/50 and (an_y-10)/50 == lis[3] and (an_x-10)/50 == lis[4]) or lis[0] == 0:
+						print abs((an_x-10)/50 - (de_x -10)/50), abs((an_y -10)/50 - (de_y -10)/50),var
+						if (var and abs((an_x-10)/50 - (de_x -10)/50) > 1 and abs((an_y -10)/50 - (de_y -10)/50) > 1) or (not var):
 							pinta(an_x,an_y,cor_preta,0)
 							movePeca((an_x,an_y),(de_x,de_y), cor_azul if vez == 2 else cor_vermelha)
 
@@ -177,18 +178,14 @@ def main():
 									p_azul += 1
 								matriz[(de_y+b - 10) / 50][(de_x+a - 10)/50] = 0
 								print "pontos do vermelho: %d\npontos do azul: %d"%(p_vermelho,p_azul)
-								if canEat()[0] == 0:
+								if not canEat():
 									vez = 2 if vez == 4 else 4
 							else:
 								vez = 2 if vez == 4 else 4
 
 							retangulo(10+(de_x+a-10)/50*50,10+(de_y+b-10)/50*50,cor_preta)
 							clique = False
-							aux = lis
-							lis = canEat()
-							if lis[0] == aux[0] and lis[1] == aux[1] and lis[2] == aux[2]:
-								lis[3] = aux[3]
-								lis[4] = aux[]
+							var = canEat()
 					else:
 						mudaCor((an_y-10)/50,(an_x-10)/50,cor_preta)
 						colocaPeca(an_x,an_y, cor_azul if vez == 2 else cor_vermelha)
